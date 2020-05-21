@@ -1,9 +1,11 @@
 let express=require("express")
 let app=express()
 
+app.set('view engine','ejs')
+
 app.get('/', (request,response)=>{
 
-    response.send("salut")
+    response.render("pages/index",{test: "salut"})
 
 })
 
