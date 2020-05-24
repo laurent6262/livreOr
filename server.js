@@ -7,14 +7,6 @@ let session=require("express-session")
 
 app.set('view engine','ejs')
 
-// paramétrage de l'accès aux fichiers statiques
-
-app.use('/assets',express.static('public'))
-
-// nos middleWares
-
-app.use(bodyParser.urlencoded({ extended: false }))
-
 // l'utilisation des sessions
 
 app.use(session({
@@ -26,31 +18,46 @@ app.use(session({
 
 }))
 
+// paramétrage de l'accès aux fichiers statiques
+
+app.use('/assets',express.static('public'))
+
+// les middleWares
+
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// notre propre middleWare
+
+app.use(require('./middlewares/flash'))
+
 
 // les routes
 
 app.get('/', (request,response)=>{
-
-    if(request.session.erreur) {
-        response.locals.erreur = request.session.erreur
-        request.session.erreur=undefined
-    }
-
-    response.render("pages/index")
-   
-
+    let Message=require('./models/message')
+    Message.all(function(callBack) {
+       response.render("pages/index",{messages: callBack})
+    })
 })
 
 app.post('/', (request,response)=> {
     
     if(request.body.message === undefined || request.body.message === ''){
-
-        // response.render("pages/index",{erreur : "vous n'avez pas saisi de message"})
-        // response.redirect('/')
-        request.session.erreur="vous n'avez pas saisi de message"
+        request.flash('error',"vous n'avez pas posté de message")
         response.redirect('/')
+                
+    }
+    else {
+
+        let Message=require('./models/message')
+        Message.create(request.body.message,function () {
+          request.flash('success',"message enregistré en base de données")  
+          response.redirect('/')
+
+        })
     }
 
+    
         
 })
 
