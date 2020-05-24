@@ -34,6 +34,7 @@ app.use(require('./middlewares/flash'))
 // les routes
 
 app.get('/', (request,response)=>{
+    console.log(process.env.NODE_ENV)
     let Message=require('./models/message')
     Message.all(function(callBack) {
        response.render("pages/index",{messages: callBack})
@@ -56,9 +57,17 @@ app.post('/', (request,response)=> {
 
         })
     }
-
-    
-        
 })
+
+app.get('/message/:id',(request,response)=>{
+
+    let Message=require('./models/message')
+    Message.find(request.params.id, function(message){
+    response.render("./message/show",{message: message})
+    })
+    
+})
+        
+
 
 app.listen(8080)
